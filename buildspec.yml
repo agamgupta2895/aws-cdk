@@ -1,0 +1,23 @@
+version: 0.2
+env:
+  variables:
+    TEST_VAR: "agam"
+phases:
+  install:
+    runtime-versions:
+      nodejs: 12.x
+      python: 3.7
+    commands:
+      - npm install aws-cdk
+      - python -m pip install -r requirements.txt
+  pre_build:
+    commands:
+      - npm install
+      - echo $TEST_VAR
+  build:
+    commands:
+      - npx sls package --stage zs
+      - npx sls deploy --stage zs --package .serverless
+artifacts:
+  files:
+    - '**/*'
