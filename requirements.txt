@@ -16,3 +16,8 @@ aws-cdk.aws-wafv2
 aws-cdk.aws-route53
 aws-cdk.aws-route53-targets
 aws-cdk.aws-cloudtrail
+aws-cdk.aws-codebuild
+aws-cdk.aws-codecommit
+aws-cdk.aws-codepipeline
+aws-cdk.aws-codepipeline-actions
+aws-cdk.aws-rds
