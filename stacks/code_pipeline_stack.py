@@ -21,8 +21,8 @@ class PipelineStack(cdk.Stack):
         super().__init__(scope, construct_id, **kwargs)
         project_name = self.node.try_get_context("project_name")
         env = self.node.try_get_context("env")
-        code = cc.Repository.from_repository_name(self, "ImportedRepo",'aws-cdk')
-        vpc_build = cb.PipelineProject(self, "vpc-build",
+        code = cc.Repository.from_repository_name(self, "ImportedRepo-dev",'aws-cdk')
+        vpc_build = cb.PipelineProject(self, "vpc-build-dev",
                             build_spec=cb.BuildSpec.from_object(
                                 dict(
                                     version="0.2",
