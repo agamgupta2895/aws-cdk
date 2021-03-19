@@ -29,7 +29,8 @@ setuptools.setup(
         "aws-cdk.aws-secretsmanager",
         "aws-cdk.aws-codebuild",
         "aws-cdk.aws-codepipeline",
-        "aws-cdk.aws-codepipeline-actions"
+        "aws-cdk.aws-codepipeline-actions",
+        "aws-cdk.aws-codecommit"
     ],
 
     python_requires=">=3.6",

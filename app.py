@@ -14,6 +14,7 @@ from stacks.bastion_stack import BastionStack
 from stacks.kms_stack import KmsStack
 from stacks.s3_stack import S3Stack
 from stacks.rds_stack import RDSStack
+from stacks.code_pipeline_stack import PipelineStack
 
 app = core.App()
 vpc_stack = VPCStack(app, "vpc")
@@ -23,5 +24,7 @@ kms_stack = KmsStack(app,'kms-stack')
 s3_stack = S3Stack(app,'s3-stack')
 rds_stack = RDSStack(app, 'rds-stack', vpc=vpc_stack.vpc, lambdasg=security_stack.lambda_sg, bastionsg=security_stack.bastion_sg, kmskey= kms_stack.kms_rds)
 
+
+pipeline_stack = PipelineStack(app,'pipeline-stack')
 
 app.synth()

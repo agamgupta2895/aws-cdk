@@ -8,16 +8,20 @@ from aws_cdk import (
     aws_ec2 as ec2,
     aws_ssm as ssm,
     aws_codebuild as cb,
-    aws_codepipeline as cp
+    aws_codepipeline as cp,
+    aws_codecommit as cc,
+    aws_codepipeline_actions as cpa,
+
 )
 
 
-class VPCStack(cdk.Stack):
+class PipelineStack(cdk.Stack):
 
     def __init__(self, scope: cdk.Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
         project_name = self.node.try_get_context("project_name")
         env = self.node.try_get_context("env")
+        code = cc.Repository.from_repository_name(self, "ImportedRepo",'aws-cdk')
         vpc_build = cb.PipelineProject(self, "vpc-build",
                             build_spec=cb.BuildSpec.from_object(
                                 dict(
@@ -29,7 +33,10 @@ class VPCStack(cdk.Stack):
                                                 "npm update",
                                                 "python -m pip install -r ../requirements.txt"
                                             ]),
-                                        build=dict(commands=["npx cdk deploy vpc"])
+                                        build=dict(commands=[
+                                            "cd ..",
+                                            "npx cdk deploy vpc"
+                                        ])
                                     ),
                                     artifacts={
                                         "files": ["**/*"]
@@ -43,13 +50,13 @@ class VPCStack(cdk.Stack):
             stages=[
                 cp.StageProps(stage_name="Source",
                     actions=[
-                        cp.CodeCommitSourceAction(
+                        cpa.CodeCommitSourceAction(
                             action_name="CodeCommit_Source",
                             repository=code,
                             output=source_output)]),
                 cp.StageProps(stage_name="Build",
                     actions=[
-                        cp.CodeBuildAction(
+                        cpa.CodeBuildAction(
                             action_name="Vpc-Build",
                             project=vpc_build,
                             input=source_output,
