@@ -31,6 +31,9 @@ class PipelineStack(cdk.Stack):
                                             commands=[
                                                 "npm install aws-cdk",
                                                 "npm update",
+                                                "ls"
+                                                "cd.."
+                                                "ls"
                                                 "python -m pip install -r ../requirements.txt"
                                             ]),
                                         build=dict(commands=[
