@@ -31,7 +31,7 @@ class PipelineStack(cdk.Stack):
                                             commands=[
                                                 "npm install aws-cdk",
                                                 "npm update",
-                                                "python -m pip install -r requirements.txt"
+                                                "pip install -r requirements.txt"
                                             ]),
                                         build=dict(commands=[
                                             "npx cdk deploy vpc"
@@ -62,5 +62,3 @@ class PipelineStack(cdk.Stack):
                             outputs=[vpc_build_output])])
                 ]
             )
-
-        
