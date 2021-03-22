@@ -35,6 +35,7 @@ class CodeBuildProject():
                                             ]),
                                         build=dict(commands=[
                                             "cd ..",
+                                            "ls",
                                             f"cdk deploy {module_name}"
                                         ])
                                     ),
