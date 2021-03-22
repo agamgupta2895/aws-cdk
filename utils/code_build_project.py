@@ -34,15 +34,12 @@ class CodeBuildProject():
                                                 "pip install -r requirements.txt"
                                             ]),
                                         build=dict(commands=[
-                                            "ls",
-                                            f"cdk deploy {module_name}",
-                                            "cd ..",
-                                            "ls",
                                             f"cdk deploy {module_name}"
                                         ])
                                     ),
                                     artifacts={
-                                        "files": ["**/*"]
+                                        "files": ["**/*"],
+                                        "enable-symlinks": "yes"
                                     },
                                     environment=dict(buildImage=cb.LinuxBuildImage.STANDARD_2_0))
                             )
