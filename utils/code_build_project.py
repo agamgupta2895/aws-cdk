@@ -28,7 +28,6 @@ class CodeBuildProject():
                                     phases=dict(
                                         install=dict(
                                             commands=[
-                                                "printenv",
                                                 "echo $STAGE",
                                                 "npm install aws-cdk",
                                                 "npm update",
