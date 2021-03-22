@@ -35,6 +35,7 @@ class CodeBuildProject():
                                                 "pip install -r requirements.txt"
                                             ]),
                                         build=dict(commands=[
+                                            "cd ..",
                                             f"cdk deploy {module_name}"
                                         ])
                                     ),
