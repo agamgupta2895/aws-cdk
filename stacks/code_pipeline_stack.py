@@ -23,13 +23,7 @@ class PipelineStack(cdk.Stack):
         project_name = self.node.try_get_context("project_name")
         env = self.node.try_get_context("env")
 
-        source_output = cp.Artifact()
         
-        code = cc.Repository.from_repository_name(self, "ImportedRepo-dev",'aws-cdk')
-        source_action = cpa.CodeCommitSourceAction(action_name="CodeCommit_Source",
-                            repository=code,
-                            output=source_output
-        )
         s3_build_project = cbp.build_pipeline_project(self,'s3-stack-dev','s3-stack')
 
         
@@ -77,6 +71,13 @@ class PipelineStack(cdk.Stack):
         #         )
         #     ]
         # )
+        source_output = cp.Artifact()
+        
+        code = cc.Repository.from_repository_name(self, "ImportedRepo-dev",'aws-cdk')
+        source_action = cpa.CodeCommitSourceAction(action_name="CodeCommit_Source",
+                            repository=code,
+                            output=source_output
+        )
         b = cbp.build_code_pipeline_action_project('s3-build-dev',s3_build_project,source_output,s3_build_output,source_action)
         cp.Pipeline(self, "Pipeline",
             stages=[
