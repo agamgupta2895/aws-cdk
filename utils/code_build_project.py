@@ -34,7 +34,7 @@ class CodeBuildProject():
                                                 "pip install -r requirements.txt"
                                             ]),
                                         build=dict(commands=[
-                                            f"cdk deploy {module_name}"
+                                            f"npx cdk deploy {module_name}"
                                         ])
                                     ),
                                     artifacts={
