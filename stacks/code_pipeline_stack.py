@@ -34,7 +34,7 @@ class PipelineStack(cdk.Stack):
                                                 "pip install -r requirements.txt"
                                             ]),
                                         build=dict(commands=[
-                                            "cdk deploy vpc"
+                                            "npx cdk deploy vpc"
                                         ])
                                     ),
                                     artifacts={
