@@ -13,7 +13,6 @@ from aws_cdk import (
     aws_codepipeline_actions as cpa,
 
 )
-from utils.code_build_project import CodeBuildProject as cbp
 
 
 class PipelineStack(cdk.Stack):
@@ -23,25 +22,19 @@ class PipelineStack(cdk.Stack):
         project_name = self.node.try_get_context("project_name")
         env = self.node.try_get_context("env")
         code = cc.Repository.from_repository_name(self, "ImportedRepo-dev",'aws-cdk')
-        
-        #s3_build_project = cbp.build_pipeline_project(self,'s3-stack-dev','s3-stack')
-
-        
-        s3_build = cb.PipelineProject(self, "s3-dev",
+        vpc_build = cb.PipelineProject(self, "vpc-build-dev",
                             build_spec=cb.BuildSpec.from_object(
                                 dict(
                                     version="0.2",
                                     phases=dict(
                                         install=dict(
                                             commands=[
-                                                "printenv",
-                                                "echo $STAGE",
                                                 "npm install aws-cdk",
                                                 "npm update",
                                                 "pip install -r requirements.txt"
                                             ]),
                                         build=dict(commands=[
-                                            "cdk deploy s3_stack"
+                                            "cdk deploy vpc"
                                         ])
                                     ),
                                     artifacts={
@@ -50,46 +43,22 @@ class PipelineStack(cdk.Stack):
                                     environment=dict(buildImage=cb.LinuxBuildImage.STANDARD_2_0))
                             )
         )
-        
-        
-        s3_build_output = cp.Artifact("s3-build-output")
         source_output = cp.Artifact()
-        source_action = cpa.CodeCommitSourceAction(action_name="CodeCommit_Source",
-                            repository=code,
-                            output=source_output
-        )
+        vpc_build_output = cp.Artifact("vpc-build-output")
         cp.Pipeline(self, "Pipeline",
             stages=[
                 cp.StageProps(stage_name="Source",
-                    actions=[source_action]),
+                    actions=[
+                        cpa.CodeCommitSourceAction(
+                            action_name="CodeCommit_Source",
+                            repository=code,
+                            output=source_output)]),
                 cp.StageProps(stage_name="Build",
                     actions=[
                         cpa.CodeBuildAction(
-                            action_name="s3-Build",
-                            project=s3_build,
+                            action_name="Vpc-Build",
+                            project=vpc_build,
                             input=source_output,
-                            outputs=[s3_build_output],
-                            environment_variables={"STAGE":{"value":source_action.variables.branch_name}}
-                        )
-                    
-                    ]
-                )
-            ]
-        )
-        
-        
-        # code = cc.Repository.from_repository_name(self, "ImportedRepo-dev",'aws-cdk')
-        # source_action = cpa.CodeCommitSourceAction(action_name="CodeCommit_Source",
-        #                     repository=code,
-        #                     output=source_output
-        # )
-        # b = cbp.build_code_pipeline_action_project('s3-build-dev',s3_build_project,source_output,s3_build_output,source_action)
-        # cp.Pipeline(self, "Pipeline",
-        #     stages=[
-        #         cp.StageProps(stage_name="Source",
-        #             actions=[source_action]),
-        #         cp.StageProps(stage_name="Build",
-        #             actions=[b]
-        #         )
-        #     ]
-        # )
+                            outputs=[vpc_build_output])])
+                ]
+            )
