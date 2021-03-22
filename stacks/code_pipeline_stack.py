@@ -21,20 +21,30 @@ class PipelineStack(cdk.Stack):
         super().__init__(scope, construct_id, **kwargs)
         project_name = self.node.try_get_context("project_name")
         env = self.node.try_get_context("env")
+        source_output = cp.Artifact()
         code = cc.Repository.from_repository_name(self, "ImportedRepo-dev",'aws-cdk')
-        vpc_build = cb.PipelineProject(self, "vpc-build-dev",
+        source_action = cpa.CodeCommitSourceAction(action_name="CodeCommit_Source",
+                            repository=code,
+                            output=source_output
+        )
+        s3_build = cb.PipelineProject(self, "s3-dev",
                             build_spec=cb.BuildSpec.from_object(
                                 dict(
                                     version="0.2",
+                                    environmentVariables = {
+                                     "STAGE": source_action.variables.branch_name    
+                                    },
                                     phases=dict(
                                         install=dict(
                                             commands=[
+                                                "printenv"
+                                                "echo $STAGE"
                                                 "npm install aws-cdk",
                                                 "npm update",
                                                 "pip install -r requirements.txt"
                                             ]),
                                         build=dict(commands=[
-                                            "cdk deploy vpc"
+                                            "cdk deploy s3_stack"
                                         ])
                                     ),
                                     artifacts={
@@ -43,21 +53,18 @@ class PipelineStack(cdk.Stack):
                                     environment=dict(buildImage=cb.LinuxBuildImage.STANDARD_2_0))
                             )
         )
-        source_output = cp.Artifact()
-        vpc_build_output = cp.Artifact("vpc-build-output")
+        
+        
+        vpc_build_output = cp.Artifact("s3-build-output")
         cp.Pipeline(self, "Pipeline",
             stages=[
                 cp.StageProps(stage_name="Source",
-                    actions=[
-                        cpa.CodeCommitSourceAction(
-                            action_name="CodeCommit_Source",
-                            repository=code,
-                            output=source_output)]),
+                    actions=[source_action]),
                 cp.StageProps(stage_name="Build",
                     actions=[
                         cpa.CodeBuildAction(
-                            action_name="Vpc-Build",
-                            project=vpc_build,
+                            action_name="s3-Build",
+                            project=s3_build,
                             input=source_output,
                             outputs=[vpc_build_output])])
                 ]

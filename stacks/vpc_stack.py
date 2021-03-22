@@ -21,8 +21,7 @@ class VPCStack(cdk.Stack):
                             ec2.SubnetConfiguration(name="Public",subnet_type=ec2.SubnetType.PUBLIC,cidr_mask=24),
                             ec2.SubnetConfiguration(name="Private",subnet_type=ec2.SubnetType.PRIVATE,cidr_mask=24),
                             ec2.SubnetConfiguration(name="Isolated",subnet_type=ec2.SubnetType.ISOLATED,cidr_mask=24),
-                        ],
-                        nat_gateways=1
+                        ]
         )
         
         #extracting private subnets from the vpc

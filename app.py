@@ -16,7 +16,24 @@ from stacks.s3_stack import S3Stack
 from stacks.rds_stack import RDSStack
 from stacks.code_pipeline_stack import PipelineStack
 
+import os
+
+try:
+    deploymentStage = os.environ['STAGE']
+except KeyError as err:
+    print("Environment variable STAGE is not set") 
+
+
 app = core.App()
+pipeline_stack = PipelineStack(app,'pipeline-stack')
+
+
+
+
+
+
+
+
 vpc_stack = VPCStack(app, "vpc")
 security_stack = SecurityStack(app, 'security-stack', vpc=vpc_stack.vpc)
 bastion_stack = BastionStack(app,'bastion-stack',vpc = vpc_stack.vpc,sg = security_stack.bastion_sg)
@@ -25,6 +42,6 @@ s3_stack = S3Stack(app,'s3-stack')
 rds_stack = RDSStack(app, 'rds-stack', vpc=vpc_stack.vpc, lambdasg=security_stack.lambda_sg, bastionsg=security_stack.bastion_sg, kmskey= kms_stack.kms_rds)
 
 
-pipeline_stack = PipelineStack(app,'pipeline-stack')
+
 
 app.synth()
