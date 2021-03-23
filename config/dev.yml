@@ -1,7 +1,5 @@
 modules:
   -  name: pipeline-stack
      runOrder: 1
-  -  name: vpc-stack
-     runOrder: 2
   -  name: s3-stack
      runOrder: 2
