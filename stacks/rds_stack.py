@@ -12,26 +12,29 @@ from aws_cdk import (
     aws_kms as kms,
     aws_secretsmanager as sm
 )
-
+import os
 import json
 class RDSStack(cdk.Stack):
 
     def __init__(self, scope: cdk.Construct, construct_id: str, vpc: ec2.Vpc, lambdasg: ec2.SecurityGroup, bastionsg: ec2.SecurityGroup,kmskey, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
         project_name = self.node.try_get_context("project_name")
-        env = self.node.try_get_context("env")
+        try:
+            stage = os.environ['STAGE']
+        except KeyError as err:
+            print("Environment variable STAGE is not set") 
         json_template = {'user':'admin'}
-        db_creds = sm.Secret(self,f'db-secret-{env}',secret_name= f'{env}-rds-secret',
+        db_creds = sm.Secret(self,f'db-secret-{stage}',secret_name= f'{stage}-rds-secret',
                             generate_secret_string=sm.SecretStringGenerator(
                                 include_space=False,
                                 password_length=12,
-                                generate_string_key=f'rds-password-{env}',
+                                generate_string_key=f'rds-password-{stage}',
                                 exclude_punctuation=True,
                                 secret_string_template=json.dumps(json_template)    
                             )
         )
-        db_mysql = rds.DatabaseCluster(self, f'mysql{env}', 
-                                        default_database_name = f'rds{env}',
+        db_mysql = rds.DatabaseCluster(self, f'mysql{stage}', 
+                                        default_database_name = f'rds{stage}',
                                         engine = rds.DatabaseClusterEngine.AURORA_MYSQL,
                                         instance_props = rds.InstanceProps(
                                             vpc = vpc,
@@ -44,4 +47,4 @@ class RDSStack(cdk.Stack):
         db_mysql.connections.allow_default_port_from(lambdasg, "Access from lambda function")
         db_mysql.connections.allow_default_port_from(bastionsg, "Access from bastion sg")
 
-        ssm.StringParameter(self, f'db-host-{env}', parameter_name=f"/{env}/db-host-{env}",string_value= db_mysql.cluster_endpoint.hostname)
+        ssm.StringParameter(self, f'db-host-{stage}', parameter_name=f"/{stage}/db-host-{stage}",string_value= db_mysql.cluster_endpoint.hostname)

@@ -8,15 +8,18 @@ from aws_cdk import (
     aws_kms as kms,
     aws_ssm as ssm
 )
-
+import os
 
 class KmsStack(cdk.Stack):
 
     def __init__(self, scope: cdk.Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
         project_name = self.node.try_get_context("project_name")
-        env = self.node.try_get_context("env")
-        self.kms_rds = kms.Key(self,f'rds-key-{env}',description=f'{project_name} rds key {env}',enable_key_rotation=True)
-        self.kms_rds.add_alias(alias_name=f'alias/{project_name}-key-rds-{env}')
+        try:
+            stage = os.environ['STAGE']
+        except KeyError as err:
+            print("Environment variable STAGE is not set") 
+        self.kms_rds = kms.Key(self,f'rds-key-{stage}',description=f'{project_name} rds key {stage}',enable_key_rotation=True)
+        self.kms_rds.add_alias(alias_name=f'alias/{project_name}-key-rds-{stage}')
 
-        ssm.StringParameter(self,f'rds-key-param-{env}',string_value=self.kms_rds.key_id,parameter_name=f"/{env}/rds")
+        ssm.StringParameter(self,f'rds-key-param-{stage}',string_value=self.kms_rds.key_id,parameter_name=f"/{stage}/rds")

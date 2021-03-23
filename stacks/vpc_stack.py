@@ -8,15 +8,18 @@ from aws_cdk import (
     aws_ec2 as ec2,
     aws_ssm as ssm
 )
-
+import os
 
 class VPCStack(cdk.Stack):
 
     def __init__(self, scope: cdk.Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
         project_name = self.node.try_get_context("project_name")
-        env = self.node.try_get_context("env")
-        self.vpc = ec2.Vpc(self, f"vpc-{env}",cidr="172.32.0.0/16",max_azs=3,enable_dns_hostnames=True, enable_dns_support=True,
+        try:
+            stage = os.environ['STAGE']
+        except KeyError as err:
+            print("Environment variable STAGE is not set") 
+        self.vpc = ec2.Vpc(self, f"vpc-{stage}",cidr="172.32.0.0/16",max_azs=3,enable_dns_hostnames=True, enable_dns_support=True,
                         subnet_configuration=[
                             ec2.SubnetConfiguration(name="Public",subnet_type=ec2.SubnetType.PUBLIC,cidr_mask=24),
                             ec2.SubnetConfiguration(name="Private",subnet_type=ec2.SubnetType.PRIVATE,cidr_mask=24),
@@ -30,8 +33,8 @@ class VPCStack(cdk.Stack):
         count = 1
         for ps in private_subnets:
             ssm.StringParameter(self,
-                                f"private-subnet-{count}-{env}",
+                                f"private-subnet-{count}-{stage}",
                                 string_value=ps,
-                                parameter_name=f"/{env}/private-subnet-{count}"
+                                parameter_name=f"/{stage}/private-subnet-{count}"
             )
             count += 1

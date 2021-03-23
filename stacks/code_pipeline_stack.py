@@ -16,30 +16,27 @@ from aws_cdk import (
 )
 from utils.code_build_project import CodeBuildProject as cbp
 import yaml
-
+import os
 class PipelineStack(cdk.Stack):
 
     def __init__(self, scope: cdk.Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
         project_name = self.node.try_get_context("project_name")
-        env = self.node.try_get_context("env")
+        try:
+            stage = os.environ['STAGE']
+        except KeyError as err:
+            print("Environment variable STAGE is not set") 
+
         source_output = cp.Artifact()
         
         code = cc.Repository.from_repository_name(self, "ImportedRepo-dev",'aws-cdk')
         source_action = cpa.CodeCommitSourceAction(action_name="CodeCommit_Source",
                             repository=code,
-                            output=source_output
+                            output=source_output,
+                            branch = stage
         )
-
-        #Fetching branch name 
-        #
-        ccsv = cpa.CodeCommitSourceVariables(author_date="",branch_name="master",commit_id="",commit_message="",committer_date="",repository_name="")
-        stage = ccsv.branch_name
         print(stage)
-        config = self.readConfig(stage)
-        
-        #{'modules': [{'name': 'vpc_stack'}, {'name': 'security_stack'}]}
-
+        config = self.readConfig(stage)    
         modules = config["modules"]
         #iterating through the modules
         stack_projects = []
@@ -47,7 +44,7 @@ class PipelineStack(cdk.Stack):
             build_project = cbp.build_pipeline_project(self,f"{project['name']}-{stage}",f"{project['name']}",stage)
             build_project.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AdministratorAccess'))
             build_output = cp.Artifact(f"{project['name']}-output")
-            stack_project = cbp.build_code_pipeline_action_project(f"{project['name']}-stack-{stage}",
+            stack_project = cbp.build_code_pipeline_action_project(f"{project['name']}-{stage}",
                                                                     build_project,
                                                                     source_output,
                                                                     build_output,
@@ -62,7 +59,7 @@ class PipelineStack(cdk.Stack):
                 cp.StageProps(stage_name="Build",
                     actions=stack_projects
                 )
-            ]
+            ], pipeline_name= f'deploying-to-{stage}'
         )
         
 

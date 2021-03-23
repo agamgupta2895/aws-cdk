@@ -9,16 +9,19 @@ from aws_cdk import (
     aws_ssm as ssm,
     aws_iam as iam
 )
-
+import os
 
 class BastionStack(cdk.Stack):
 
     def __init__(self, scope: cdk.Construct, construct_id: str, vpc: ec2.Vpc, sg: ec2.SecurityGroup, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
         project_name = self.node.try_get_context("project_name")
-        env = self.node.try_get_context("env")
+        try:
+            stage = os.environ['STAGE']
+        except KeyError as err:
+            print("Environment variable STAGE is not set") 
         bastion_host = ec2.Instance(self, 
-            f'bastion-host-{env}',
+            f'bastion-host-{stage}',
             instance_type=ec2.InstanceType('t2.micro'),
             machine_image=ec2.AmazonLinuxImage(
                 edition=ec2.AmazonLinuxEdition.STANDARD,
@@ -27,7 +30,7 @@ class BastionStack(cdk.Stack):
                 storage=ec2.AmazonLinuxStorage.GENERAL_PURPOSE
             ),
             vpc=vpc,
-            key_name=f'dev-ops-{env}',
+            key_name=f'dev-ops-{stage}',
             vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PUBLIC),
             security_group=sg
         )

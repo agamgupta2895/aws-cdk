@@ -19,27 +19,21 @@ import yaml
 import os
 
 try:
-    deploymentStage = os.environ['STAGE']
+    stage = os.environ['STAGE']
 except KeyError as err:
     print("Environment variable STAGE is not set") 
 
-#reading config
 app = core.App()
-pipeline_stack = PipelineStack(app,'pipeline-stack')
 
 
 
-
-
-
-
-
-vpc_stack = VPCStack(app, "vpc")
-security_stack = SecurityStack(app, 'security-stack', vpc=vpc_stack.vpc)
-bastion_stack = BastionStack(app,'bastion-stack',vpc = vpc_stack.vpc,sg = security_stack.bastion_sg)
-kms_stack = KmsStack(app,'kms-stack')
-s3_stack = S3Stack(app,'s3-stack')
-rds_stack = RDSStack(app, 'rds-stack', vpc=vpc_stack.vpc, lambdasg=security_stack.lambda_sg, bastionsg=security_stack.bastion_sg, kmskey= kms_stack.kms_rds)
+pipeline_stack = PipelineStack(app,f'pipeline-stack-{stage}')
+vpc_stack = VPCStack(app, f"vpc-stack-{stage}")
+security_stack = SecurityStack(app, f'security-stack-{stage}', vpc=vpc_stack.vpc)
+bastion_stack = BastionStack(app,f'bastion-stack-{stage}',vpc = vpc_stack.vpc,sg = security_stack.bastion_sg)
+kms_stack = KmsStack(app,f'kms-stack-{stage}')
+s3_stack = S3Stack(app,f's3-stack-{stage}')
+rds_stack = RDSStack(app, f'rds-stack-{stage}', vpc=vpc_stack.vpc, lambdasg=security_stack.lambda_sg, bastionsg=security_stack.bastion_sg, kmskey= kms_stack.kms_rds)
 
 
 

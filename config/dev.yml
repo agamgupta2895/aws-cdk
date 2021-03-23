@@ -1,7 +1,7 @@
 modules:
   -  name: pipeline-stack
      runOrder: 1
-  -  name: security-stack
+  -  name: vpc-stack
      runOrder: 2
-  -  name: rds-stack
+  -  name: s3-stack
      runOrder: 2
