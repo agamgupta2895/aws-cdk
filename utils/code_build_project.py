@@ -19,7 +19,7 @@ from aws_cdk import (
 class CodeBuildProject():
     
     @staticmethod
-    def build_pipeline_project(self, id, module_name):
+    def build_pipeline_project(self, id, module_name,stage):
 
         return cb.PipelineProject(self, id,
                             build_spec=cb.BuildSpec.from_object(
@@ -42,15 +42,17 @@ class CodeBuildProject():
                                         "enable-symlinks": "yes"
                                     },
                                     environment=dict(buildImage=cb.LinuxBuildImage.STANDARD_2_0))
-                            )
+                            ),
+                            project_name= f'{module_name}-{stage}-build-project'
         )
     
     @staticmethod
-    def build_code_pipeline_action_project(action_name,project,input,output,source_action):
+    def build_code_pipeline_action_project(action_name,project,input,output,source_action,run_order):
         return cpa.CodeBuildAction(
                             action_name=action_name,
                             project=project,
                             input=input,
                             outputs=[output],
+                            run_order= run_order,
                             environment_variables={"STAGE":{"value":source_action.variables.branch_name}}
                         )

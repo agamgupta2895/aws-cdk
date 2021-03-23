@@ -15,7 +15,7 @@ from stacks.kms_stack import KmsStack
 from stacks.s3_stack import S3Stack
 from stacks.rds_stack import RDSStack
 from stacks.code_pipeline_stack import PipelineStack
-
+import yaml
 import os
 
 try:
@@ -23,7 +23,7 @@ try:
 except KeyError as err:
     print("Environment variable STAGE is not set") 
 
-
+#reading config
 app = core.App()
 pipeline_stack = PipelineStack(app,'pipeline-stack')
 

@@ -1,0 +1,7 @@
+modules:
+  -  name: vpc
+     runOrder: 1
+  -  name: kms-stack
+     runOrder: 1
+  -  name: s3-stack
+     runOrder: 2
