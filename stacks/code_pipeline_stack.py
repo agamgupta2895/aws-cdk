@@ -36,6 +36,12 @@ class PipelineStack(cdk.Stack):
             output=source_output,
             branch=stage
         )
+        # code = cc.Repository.from_repository_name(self, "ImportedRepo-dev",'aws-cdk')
+        # source_action = cpa.CodeCommitSourceAction(action_name="CodeCommit_Source",
+        #                     repository=code,
+        #                     output=source_output,
+        #                     branch = stage
+        # )
         
         print(stage)
         config = self.readConfig(stage)    
