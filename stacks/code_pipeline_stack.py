@@ -28,13 +28,21 @@ class PipelineStack(cdk.Stack):
             print("Environment variable STAGE is not set") 
 
         source_output = cp.Artifact()
-        
-        code = cc.Repository.from_repository_name(self, "ImportedRepo-dev",'aws-cdk')
-        source_action = cpa.CodeCommitSourceAction(action_name="CodeCommit_Source",
-                            repository=code,
-                            output=source_output,
-                            branch = stage
+        source_action = cpa.GitHubSourceAction(
+            action_name="GitHub_Source",
+            owner="agamgupta2895",
+            repo="aws-cdk",
+            oauth_token=cdk.SecretValue.secrets_manager("github-token-dev",json_field='github-token-dev'),
+            output=source_output,
+            branch=stage
         )
+        # code = cc.Repository.from_repository_name(self, "ImportedRepo-dev",'aws-cdk')
+        # source_action = cpa.CodeCommitSourceAction(action_name="CodeCommit_Source",
+        #                     repository=code,
+        #                     output=source_output,
+        #                     branch = stage
+        # )
+        
         print(stage)
         config = self.readConfig(stage)    
         modules = config["modules"]
