@@ -42,7 +42,7 @@ class PipelineStack(cdk.Stack):
         stack_projects = []
         for project in modules:
             build_project = cbp.build_pipeline_project(self,f"{project['name']}-{stage}",f"{project['name']}",stage)
-            build_project.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AdministratorAccess'))
+            #build_project.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AdministratorAccess'))
             build_output = cp.Artifact(f"{project['name']}-output")
             stack_project = cbp.build_code_pipeline_action_project(f"{project['name']}-{stage}",
                                                                     build_project,
