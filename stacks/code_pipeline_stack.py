@@ -41,14 +41,16 @@ class PipelineStack(cdk.Stack):
             repo="aws-cdk",
             oauth_token=cdk.SecretValue.secrets_manager("github-token-dev",json_field='github-token-dev'),
             output=source_output,
-            branch=stage
+            branch="dev"
         )
-        synth_action=SimpleSynthAction.standard_npm_synth(
+        synth_action=SimpleSynthAction(
                 source_artifact=source_output,
-                cloud_assembly_artifact=cloud_assembly_artifact
+                cloud_assembly_artifact=cloud_assembly_artifact,
+                install_commands=["npm install -g aws-cdk", "pip install -r requirements.txt"],
+                synth_command="npx cdk synth"
         )
         
-        pipeline = CdkPipeline(self, "pipeline-devvv",source_action=source_action,synth_action=synth_action,cross_account_keys=False,cloud_assembly_artifact=cloud_assembly_artifact)
+        pipeline = CdkPipeline(self, "pipeline-devvv",source_action=source_action,cross_account_keys=False,synth_action=synth_action,cloud_assembly_artifact=cloud_assembly_artifact)
         
         pipeline.add_application_stage(
             Stages(self,
