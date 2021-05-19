@@ -3,3 +3,6 @@ modules:
      runOrder: 1
   -  name: s3-stack
      runOrder: 2
+regions:
+   - ap-south-1
+   - us-east-1

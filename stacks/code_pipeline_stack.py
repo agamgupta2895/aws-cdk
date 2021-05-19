@@ -44,30 +44,36 @@ class PipelineStack(cdk.Stack):
         # )
         
         print(stage)
-        config = self.readConfig(stage)    
+        config = self.readConfig(stage)
         modules = config["modules"]
+        regions = config["regions"]
         #iterating through the modules
-        stack_projects = []
-        for project in modules:
-            build_project = cbp.build_pipeline_project(self,f"{project['name']}-{stage}",f"{project['name']}",stage)
-            build_project.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AdministratorAccess'))
-            build_output = cp.Artifact(f"{project['name']}-output")
-            stack_project = cbp.build_code_pipeline_action_project(f"{project['name']}-{stage}",
-                                                                    build_project,
-                                                                    source_output,
-                                                                    build_output,
-                                                                    source_action,
-                                                                    run_order= project['runOrder']
-            )
-            stack_projects.append(stack_project)
-        cp.Pipeline(self, "Pipeline",
-            stages=[
-                cp.StageProps(stage_name="Source",
-                    actions=[source_action]),
-                cp.StageProps(stage_name="Build",
-                    actions=stack_projects
+        
+        region_stack_rojects = {}
+        for region in regions:
+            stack_projects = []
+            for project in modules:
+                build_project = cbp.build_pipeline_project(self,f"{project['name']}-{stage}",f"{project['name']}",stage)
+                build_project.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AdministratorAccess'))
+                build_output = cp.Artifact(f"{project['name']}-output")
+                stack_project = cbp.build_code_pipeline_action_project(action_name = f"{project['name']}-{stage}",
+                                                                        project = build_project,
+                                                                        input = source_output,
+                                                                        output = build_output,
+                                                                        source_action = source_action,
+                                                                        run_order= project['runOrder'],
+                                                                        region=region,
                 )
-            ], pipeline_name= f'deploying-to-{stage}'
+                stack_projects.append(stack_project)
+            region_stack_rojects[region] = stack_projects
+        
+        stages = [cp.StageProps(stage_name="Source",actions=[source_action])]
+        for region,stacks in region_stack_rojects.items():
+            stages.append(cp.StageProps(stage_name=f"deploying-to-{stage}-{region}",actions=stacks))
+            
+            
+        cp.Pipeline(self, "Pipeline",
+            stages=stage, pipeline_name= f'deploying-to-{stage}'
         )
         
 
