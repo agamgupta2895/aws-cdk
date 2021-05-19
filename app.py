@@ -27,14 +27,7 @@ app = core.App()
 
 
 
-pipeline_stack = PipelineStack(app,f'pipeline-stack-{stage}')
-vpc_stack = VPCStack(app, f"vpc-stack-{stage}")
-security_stack = SecurityStack(app, f'security-stack-{stage}', vpc=vpc_stack.vpc)
-bastion_stack = BastionStack(app,f'bastion-stack-{stage}',vpc = vpc_stack.vpc,sg = security_stack.bastion_sg)
-kms_stack = KmsStack(app,f'kms-stack-{stage}')
-s3_stack = S3Stack(app,f's3-stack-{stage}')
-rds_stack = RDSStack(app, f'rds-stack-{stage}', vpc=vpc_stack.vpc, lambdasg=security_stack.lambda_sg, bastionsg=security_stack.bastion_sg, kmskey= kms_stack.kms_rds)
-
+pipeline_stack = PipelineStack(app,f'pipeline-stack-dev',env = {"account":"298397199672","region":"us-east-2"})
 
 
 

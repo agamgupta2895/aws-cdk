@@ -14,9 +14,14 @@ from aws_cdk import (
     aws_iam as iam
 
 )
+from aws_cdk.pipelines import CdkPipeline,SimpleSynthAction
+
+from stages import Stages
+
 from utils.code_build_project import CodeBuildProject as cbp
 import yaml
 import os
+
 class PipelineStack(cdk.Stack):
 
     def __init__(self, scope: cdk.Construct, construct_id: str, **kwargs) -> None:
@@ -28,6 +33,8 @@ class PipelineStack(cdk.Stack):
             print("Environment variable STAGE is not set") 
 
         source_output = cp.Artifact()
+        cloud_assembly_artifact = cp.Artifact()
+
         source_action = cpa.GitHubSourceAction(
             action_name="GitHub_Source",
             owner="agamgupta2895",
@@ -36,50 +43,22 @@ class PipelineStack(cdk.Stack):
             output=source_output,
             branch=stage
         )
-        # code = cc.Repository.from_repository_name(self, "ImportedRepo-dev",'aws-cdk')
-        # source_action = cpa.CodeCommitSourceAction(action_name="CodeCommit_Source",
-        #                     repository=code,
-        #                     output=source_output,
-        #                     branch = stage
-        # )
-        
-        print(stage)
-        config = self.readConfig(stage)
-        modules = config["modules"]
-        regions = config["regions"]
-        #iterating through the modules
-        
-        region_stack_rojects = {}
-        for region in regions:
-            stack_projects = []
-            for project in modules:
-                build_project = cbp.build_pipeline_project(self,f"{project['name']}-{stage}",f"{project['name']}",stage)
-                build_project.role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AdministratorAccess'))
-                build_output = cp.Artifact(f"{project['name']}-output")
-                stack_project = cbp.build_code_pipeline_action_project(action_name = f"{project['name']}-{stage}",
-                                                                        project = build_project,
-                                                                        input = source_output,
-                                                                        output = build_output,
-                                                                        source_action = source_action,
-                                                                        run_order= project['runOrder'],
-                                                                        region=region,
-                )
-                stack_projects.append(stack_project)
-            region_stack_rojects[region] = stack_projects
-        
-        stages = [cp.StageProps(stage_name="Source",actions=[source_action])]
-        for region,stacks in region_stack_rojects.items():
-            stages.append(cp.StageProps(stage_name=f"deploying-to-{stage}-{region}",actions=stacks))
-            
-            
-        cp.Pipeline(self, "Pipeline",
-            stages=stage, pipeline_name= f'deploying-to-{stage}'
+        synth_action=SimpleSynthAction.standard_npm_synth(
+                source_artifact=source_output,
+                cloud_assembly_artifact=cloud_assembly_artifact
         )
         
-
-    def readConfig(self,stage):
-        with open(f"config/{stage}.yml", 'r') as stream:
-            try:
-                return yaml.safe_load(stream)
-            except yaml.YAMLError as exc:
-                print(exc)
+        pipeline = CdkPipeline(self, "pipeline-devvv",source_action=source_action,synth_action=synth_action,cross_account_keys=False,cloud_assembly_artifact=cloud_assembly_artifact)
+        
+        pipeline.add_application_stage(
+            Stages(self,
+                'deploying-stage-us-2',
+                env = cdk.Environment(account="298397199672",region = "us-east-2")
+            )
+        )
+        pipeline.add_application_stage(
+            Stages(self,
+                'deploying-stage-us-1',
+                env = cdk.Environment(account="298397199672",region = "us-east-1")
+            )
+        )
