@@ -41,18 +41,19 @@ class CodeBuildProject():
                                         "files": ["**/*"],
                                         "enable-symlinks": "yes"
                                     },
-                                    environment=dict(buildImage=cb.LinuxBuildImage.STANDARD_2_0))
+                                    environment=dict(buildImage=cb.LinuxBuildImage.STANDARD_2_0, AWS_REGION='us-east-1'))
                             ),
                             project_name= f'{module_name}-{stage}-build-project'
         )
     
     @staticmethod
-    def build_code_pipeline_action_project(action_name,project,input,output,source_action,run_order):
+    def build_code_pipeline_action_project(action_name,project,input,output,source_action,run_order,region):
         return cpa.CodeBuildAction(
                             action_name=action_name,
                             project=project,
                             input=input,
                             outputs=[output],
+                            #region = region,
                             run_order= run_order,
                             environment_variables={"STAGE":{"value":source_action.variables.branch_name}}
                         )

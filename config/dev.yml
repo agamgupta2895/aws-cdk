@@ -1,5 +1,9 @@
 modules:
   -  name: pipeline-stack
      runOrder: 1
+     className: S3Stack
   -  name: s3-stack
      runOrder: 2
+regions:
+   - ap-south-1
+   #- us-east-1

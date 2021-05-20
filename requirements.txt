@@ -21,4 +21,5 @@ aws-cdk.aws-codecommit
 aws-cdk.aws-codepipeline
 aws-cdk.aws-codepipeline-actions
 aws-cdk.aws-rds
+aws-cdk.pipelines
 pyyaml
