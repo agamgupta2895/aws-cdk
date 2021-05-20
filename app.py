@@ -27,7 +27,7 @@ app = core.App()
 
 
 
-pipeline_stack = PipelineStack(app,f'pipeline-stack-dev',env = {"account":"298397199672","region":"us-east-2"})
+pipeline_stack = PipelineStack(app,f'pipeline-stack-dev',env = {"account":"278887234345","region":"us-east-2"})
 
 
 

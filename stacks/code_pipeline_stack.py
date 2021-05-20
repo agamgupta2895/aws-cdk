@@ -53,7 +53,6 @@ class PipelineStack(cdk.Stack):
         
         pipeline = CdkPipeline(self, "pipeline-devvv",
                                 source_action=source_action,
-                                cross_account_keys=False,
                                 synth_action=synth_action,
                                 cloud_assembly_artifact=cloud_assembly_artifact
 
@@ -62,13 +61,13 @@ class PipelineStack(cdk.Stack):
         pipeline.add_application_stage(
             Stages(self,
                 'deploying-stage-to-us-east-2',
-                env = cdk.Environment(account="298397199672",region = "us-east-2")
+                env = cdk.Environment(account="278887234345",region = "us-east-2")
             )
         )
         pipeline.add_application_stage(
             Stages(self,
                 'deploying-stage-to-us-east-1',
-                env = cdk.Environment(account="298397199672",region = "us-east-1")
+                env = cdk.Environment(account="278887234345",region = "us-east-1")
             )
         )
 
