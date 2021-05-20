@@ -56,6 +56,7 @@ class PipelineStack(cdk.Stack):
                                 cross_account_keys=False,
                                 synth_action=synth_action,
                                 cloud_assembly_artifact=cloud_assembly_artifact
+
         )
         
         pipeline.add_application_stage(
