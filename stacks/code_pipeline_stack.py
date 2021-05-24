@@ -60,21 +60,21 @@ class PipelineStack(cdk.Stack):
         
         pipeline.add_application_stage(
             Stages(self,
-                'deploying-stage-to-us-east-2',
+                'deploying-to-dev-us-east-2',
                 env = cdk.Environment(account="278887234345",region = "us-east-2")
             )
         )
         pipeline.add_application_stage(
             Stages(self,
-                'deploying-stage-to-us-east-1',
+                'deploying-to-dev-us-east-1',
                 env = cdk.Environment(account="278887234345",region = "us-east-1")
             )
         )
 
         pipeline.add_application_stage(
             Stages(self,
-                'deploying-to-aman-us-east-1',
-                env = cdk.Environment(account="630592464262",region = "us-east-1")
-            )
+                'deploying-to-prod-us-east-1',
+                env = cdk.Environment(account="630592464262",region = "us-east-1"),
+            ),manual_approvals=True
         )
         
